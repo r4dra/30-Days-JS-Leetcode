@@ -68,3 +68,39 @@
 // The emit action takes between either 1 or 2 arguments. The first argument is the name of the event we want to emit, and the 2nd argument is passed to the callback functions.
 // The subscribe action takes 2 arguments, where the first one is the event name and the second is the callback function.
 // The unsubscribe action takes one argument, which is the 0-indexed order of the subscription made before.
+
+class EventEmitter {
+  constructor() {
+    this.events = {};
+  }
+  
+  subscribe(eventName, callback) {
+    if (!this.events[eventName]) {
+      this.events[eventName] = [];
+    }
+    
+    const eventListener = { callback };
+    this.events[eventName].push(eventListener);
+    
+    return {
+      unsubscribe: () => {
+        const index = this.events[eventName].indexOf(eventListener);
+        if (index > -1) {
+          this.events[eventName].splice(index, 1);
+          return undefined;
+        }
+      }
+    };
+  }
+  
+  emit(eventName, args = []) {
+    const eventListeners = this.events[eventName];
+    if (!eventListeners) {
+      return [];
+    }
+    
+    return eventListeners.map((eventListener) => {
+      return eventListener.callback(...args);
+    });
+  }
+}
